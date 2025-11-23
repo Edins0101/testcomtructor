@@ -6,9 +6,14 @@ class AppTheme {
   static const Color primaryMedium = Color(0xFF3B82F6);
   static const Color primaryDarkest = Color(0xFF1E3A8A);
   static const Color gray = Color(0xFF6B7280);
+  static const Color red = Color(0xFFEF4444);
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
   static const Color transparent = Colors.transparent;
+  
+  //icons
+  static const String loading = "assets/loading.png";
+
   ThemeData theme() {
     return ThemeData(
       textSelectionTheme: const TextSelectionThemeData(
