@@ -74,6 +74,10 @@ namespace backendquickquote.Models
         string ProjectName,
         List<QuotePriorityDto> Quotes
     );
+    public record QuotePriorityResponse(
+    bool GroupByProject,
+    List<QuoteProjectGroup> Groups
+);
 
     public record ApiResponse<T>(
     int Code,

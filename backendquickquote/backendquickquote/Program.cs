@@ -1,6 +1,7 @@
 ﻿using backendquickquote.Models;
 using Npgsql;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,48 +117,112 @@ app.MapGet("/products/{id:int}", async (int id, NpgsqlConnection conn) =>
 
 
 // GET /quotes
-app.MapGet("/quotes", async (NpgsqlConnection conn, int skip = 0, int take = 10) =>
+app.MapGet("/quotes/by-priority", async (
+    NpgsqlConnection conn,
+    int skip = 0,
+    int take = 10,
+    bool groupByProject = true
+    ) =>
 {
     if (skip < 0) skip = 0;
     if (take <= 0) take = 10;
     if (take > 100) take = 100;
 
-    var list = new List<Quote>();
-
     await conn.OpenAsync();
 
     const string sql = @"
-        SELECT id, items, total, status, created_at, updated_at
-        FROM quotes
-        ORDER BY created_at DESC
+        SELECT 
+            q.id,
+            q.items,
+            q.total,
+            q.status,
+            q.created_at,
+            q.updated_at,
+            q.project_id,
+            p.name AS project_name,
+            q.customer_impact,
+            q.expires_at,
+            CASE LOWER(q.customer_impact)
+                WHEN 'vip' THEN 3
+                WHEN 'standard' THEN 2
+                WHEN 'internal' THEN 1
+                ELSE 0
+            END AS impact_score,
+            EXTRACT(EPOCH FROM (q.expires_at - NOW())) / 3600.0 AS hours_left
+        FROM quotes q
+        LEFT JOIN projects p ON p.id = q.project_id
+        WHERE q.status <> 'cancelled' -- ejemplo de filtro
+        ORDER BY
+            impact_score DESC,      -- primero impacto
+            q.expires_at ASC       -- luego lo que vence antes
         LIMIT @take OFFSET @skip;
     ";
 
-    await using var cmd = new NpgsqlCommand(sql, conn);
-    cmd.Parameters.AddWithValue("take", take);
-    cmd.Parameters.AddWithValue("skip", skip);
+    var list = new List<QuotePriorityDto>();
 
-    await using var reader = await cmd.ExecuteReaderAsync();
-
-    while (await reader.ReadAsync())
+    await using (var cmd = new NpgsqlCommand(sql, conn))
     {
-        list.Add(new Quote(
-            reader.GetInt32(0),
-            reader.GetInt32(1),
-            reader.GetDecimal(2),
-            reader.GetString(3),
-            reader.GetDateTime(4),
-            reader.GetDateTime(5)
+        cmd.Parameters.AddWithValue("take", take);
+        cmd.Parameters.AddWithValue("skip", skip);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            list.Add(new QuotePriorityDto(
+                Id: reader.GetInt32(0),
+                Items: reader.GetInt32(1),
+                Total: reader.GetDecimal(2),
+                Status: reader.GetString(3),
+                CreatedAt: reader.GetDateTime(4),
+                UpdatedAt: reader.GetDateTime(5),
+                ProjectId: reader.IsDBNull(6) ? null : reader.GetInt32(6),
+                ProjectName: reader.IsDBNull(7) ? null : reader.GetString(7),
+                CustomerImpact: reader.GetString(8),
+                ExpiresAt: reader.GetDateTime(9),
+                ImpactScore: reader.GetInt32(10),
+                HoursLeft: reader.GetDouble(11)
+            ));
+        }
+    }
+
+    if (!groupByProject)
+    {
+        // Respuesta plana, solo ordenada por prioridad
+        var respOkNoGroup = new ApiResponse<List<QuotePriorityDto>>(
+        Code: 200,
+        Message: "Cotización obtenida.",
+        Data: list
+    );
+        return Results.Ok(respOkNoGroup);
+    }
+
+    // Agrupar por proyecto (incluyendo los que no tienen proyecto)
+    var groups = new List<QuoteProjectGroup>();
+
+    foreach (var grp in list.GroupBy(q => q.ProjectId))
+    {
+        var projectId = grp.Key;
+        var projectName = grp.First().ProjectName ?? "Sin proyecto";
+
+        groups.Add(new QuoteProjectGroup(
+            ProjectId: projectId,
+            ProjectName: projectName,
+            Quotes: grp.ToList()
         ));
     }
 
-    var resp = new ApiResponse<List<Quote>>(
-        Code: 200,
-        Message: "Cotizaciones obtenidas.",
-        Data: list
-    );
+    var response = new QuotePriorityResponse(
+    GroupByProject: true,
+    Groups: groups
+);
 
-    return Results.Ok(resp);
+    var respOk = new ApiResponse<QuotePriorityResponse>(
+        Code: 200,
+        Message: "Cotización obtenida.",
+        Data: response
+    );
+    return Results.Ok(respOk);
 });
 
 // GET /quotes/{id} 
