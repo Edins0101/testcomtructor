@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quickquote/modules/quotes/widgets/quotes_priority.dart';
 import 'package:quickquote/shared/widgets/provider_layout.dart';
 
 class QuotesPage extends StatefulWidget {
@@ -19,7 +20,7 @@ class _QuotesPageState extends State<QuotesPage> {
       isHomePage: false,
       showBottomNavBar: true,
       title: 'Cotizaciones guardadas',
-      child: Text('quotas a mostrar'),
+      child: QuotesByPriorityWidget(),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickquote/env/theme/app_theme.dart';
+import 'package:quickquote/modules/cart_quote/pages/cart_quote_page.dart';
 import 'package:quickquote/modules/quotes/pages/quotes_page.dart';
 import 'package:quickquote/shared/helpers/global_helper.dart';
 import 'package:quickquote/shared/providers/functional_provider.dart';
@@ -47,7 +48,7 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   ScrollController _scrollController = ScrollController();
   bool alertModalBool = true;
-  final keyModalProfile = GlobalHelper.genKey();
+  final quoteCartPage = GlobalHelper.genKey();
   final myQuotePageKey = GlobalHelper.genKey();
   @override
   void initState() {
@@ -175,13 +176,28 @@ class _MainLayoutState extends State<MainLayout> {
                         padding: EdgeInsets.only(bottom: 0),
                         child: Row(
                           crossAxisAlignment: .center,
-                          mainAxisAlignment: .start,
+                          mainAxisAlignment: .spaceBetween,
                           children: [
                             TextWidget(
                               title: widget.title!,
                               color: AppTheme.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 20,
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                fp.addPage(
+                                  key: quoteCartPage,
+                                  content: QuoteCartPage(
+                                    key: quoteCartPage,
+                                    globalKey: quoteCartPage,
+                                  ),
+                                );
+                              },
+                              icon: Icon(
+                                Icons.shopping_cart_outlined,
+                                color: AppTheme.white,
+                              ),
                             ),
                           ],
                         ),
@@ -202,14 +218,13 @@ class _MainLayoutState extends State<MainLayout> {
                   right: 0,
                   bottom: 0,
                   child: BottomNavigationBar(
-                    currentIndex:
-                        fp.currentIndex, // 👈 ahora depende del provider
+                    currentIndex: fp.currentIndex,
                     onTap: (index) {
                       if (fp.currentIndex == index) {
-                        return; // si ya está seleccionada, no hago nada
+                        return;
                       }
 
-                      fp.setCurrentIndex(index); // 👈 esto hace notifyListeners
+                      fp.setCurrentIndex(index);
 
                       switch (index) {
                         case 0:

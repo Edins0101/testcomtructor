@@ -23,13 +23,11 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
   final ProductService _productService = ProductService();
 
   ProductDetailData? _detail;
-  bool _isLoadingDetail = false;
   String? _errorDetail;
 
   @override
   void initState() {
     super.initState();
-    // Esperar a que el widget tenga contexto para leer el provider
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadProductDetail();
     });
@@ -41,11 +39,6 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
 
     if (product == null) return;
 
-    setState(() {
-      _isLoadingDetail = true;
-      _errorDetail = null;
-    });
-
     final resp = await _productService.getById(context, product.id);
 
     if (!mounted) return;
@@ -53,13 +46,10 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
     if (!resp.error && resp.data != null) {
       setState(() {
         _detail = resp.data;
-        _isLoadingDetail = false;
       });
     } else {
       setState(() {
-        _isLoadingDetail = false;
-        _errorDetail =
-            resp.message;
+        _errorDetail = resp.message;
       });
     }
   }
@@ -116,24 +106,7 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
 
           SizedBox(height: size.height * 0.008),
 
-          // Descripción o loading/error del detalle
-          if (_isLoadingDetail)
-            Row(
-              children: [
-                SizedBox(
-                  width: size.width * 0.04,
-                  height: size.width * 0.04,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: size.width * 0.02),
-                TextWidget(
-                  title: 'Cargando detalle...',
-                  color: AppTheme.black,
-                  fontSize: size.width * 0.035,
-                ),
-              ],
-            )
-          else if (_errorDetail != null)
+          if (_errorDetail != null)
             TextWidget(
               title: _errorDetail!,
               color: Colors.red,
@@ -148,22 +121,14 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
 
           SizedBox(height: size.height * 0.025),
 
-          // Card de especificaciones (ahora usando lo que vino del servicio)
-          ProductSpecsCard(
-            dimensions: dimensionsText,
-          ),
+          ProductSpecsCard(dimensions: dimensionsText),
 
           SizedBox(height: size.height * 0.018),
 
-          // Card de precio + stock
-          ProductPriceStockCard(
-            price: product.price,
-            stock: product.stock,
-          ),
+          ProductPriceStockCard(price: product.price, stock: product.stock),
 
           SizedBox(height: size.height * 0.018),
 
-          // Sección de cantidad + subtotal
           ProductQuantitySection(
             quantity: qp.quantity,
             subtotal: subtotal,
@@ -173,7 +138,6 @@ class _ProductDetailWidgetState extends State<ProductDetailWidget> {
 
           SizedBox(height: size.height * 0.025),
 
-          // Botón "Agregar a Cotización"
           SizedBox(
             width: double.infinity,
             height: size.height * 0.065,

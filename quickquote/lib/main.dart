@@ -5,9 +5,11 @@ import 'package:quickquote/env/theme/app_theme.dart';
 import 'package:quickquote/shared/providers/functional_provider.dart';
 import 'package:quickquote/shared/providers/quote_provider.dart';
 import 'package:quickquote/shared/routes/app_routes.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+   await initializeDateFormatting('es');
   String environment = const String.fromEnvironment('ENVIRONMENT',
       defaultValue: Environment.dev);
   Environment().initConfig(environment);

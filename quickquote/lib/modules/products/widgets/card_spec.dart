@@ -58,7 +58,7 @@ class ProductSpecsCard extends StatelessWidget {
                   vertical: size.height * 0.004,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.gray.withOpacity(0.08),
+                  color: AppTheme.gray,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: TextWidget(
