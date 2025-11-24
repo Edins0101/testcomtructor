@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:quickquote/env/enviroment.dart';
 import 'package:quickquote/env/theme/app_theme.dart';
 import 'package:quickquote/shared/providers/functional_provider.dart';
-import 'package:quickquote/shared/providers/navegation_verify_provider.dart';
+import 'package:quickquote/shared/providers/quote_provider.dart';
 import 'package:quickquote/shared/routes/app_routes.dart';
 
 void main() {
@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FunctionalProvider()),
-        ChangeNotifierProvider(create: (_) => NavegationVerifyProvider())
+        ChangeNotifierProvider(create: (_) => QuoteProvider()),
       ],
       child: MaterialApp(
         title: appName,
@@ -32,7 +32,6 @@ class MyApp extends StatelessWidget {
         initialRoute: AppRoutes.initialRoute,
         navigatorObservers: [HeroController()],
         routes: AppRoutes.routes,
-        // onGenerateRoute: AppRoutes.onGenerateRoute,
       ),
     );
   }

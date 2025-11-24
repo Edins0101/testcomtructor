@@ -7,6 +7,13 @@ class FunctionalProvider extends ChangeNotifier {
   List<Widget> pages = [];
   String? currentPage;
   ScrollController scrollController = ScrollController();
+  int currentIndex = 0;
+
+  void setCurrentIndex(int index) {
+    if (currentIndex == index) return; // si es el mismo, no hago nada
+    currentIndex = index;
+    notifyListeners();
+  }
 
   void showAlert({
     required GlobalKey key,
@@ -33,19 +40,22 @@ class FunctionalProvider extends ChangeNotifier {
   }
 
   void addPage({required GlobalKey key, required Widget content}) {
+    // opcional: evitar duplicar por key
+    if (pages.any((p) => p.key == key)) return;
+
     currentPage = content.runtimeType.toString();
     pages.add(content);
     notifyListeners();
   }
 
-  void dismissAlert({required GlobalKey key}) {
-    alerts.removeWhere((alert) => key == alert.key);
+  void dismissPage({required GlobalKey key}) {
+    pages.removeWhere((page) => key == page.key);
+    // currentPage = '';
     notifyListeners();
   }
 
-  void dismissPage({required GlobalKey key}) {
-    pages.removeWhere((page) => key == page.key);
-    currentPage = '';
+  void dismissAlert({required GlobalKey key}) {
+    alerts.removeWhere((alert) => key == alert.key);
     notifyListeners();
   }
 

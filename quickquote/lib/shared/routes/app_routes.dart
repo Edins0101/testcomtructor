@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quickquote/modules/products/page/product_page.dart';
+import 'package:quickquote/modules/products/pages/product_page.dart';
 
 class AppRoutes {
   static const initialRoute = '/Products';

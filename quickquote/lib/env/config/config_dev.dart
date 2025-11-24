@@ -6,5 +6,5 @@ class DevEnv extends BaseConfig {
   String get appName => 'Quick Quote - Dev';
 
   @override
-  String get serviceUrl => '';
+  String get serviceUrl => 'http://10.0.2.2:5198';
 }

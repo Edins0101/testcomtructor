@@ -243,10 +243,9 @@ class InterceptorHttp {
           "Ocurrió un error al consultar el servicio. Contáctese con el administrador";
       debugPrint(ex.toString());
       fp.dismissAlert(key: keyLoading);
-    } on SocketException {
+    } on SocketException catch (e, stacktrace) {
       generalResponse.error = true;
-      generalResponse.message =
-          "Verifique su conexión a internet y vuelva a intentar.";
+      generalResponse.message =e.message;
       fp.dismissAlert(key: keyLoading);
       onPress = () {
         fp.clearAllAlert();

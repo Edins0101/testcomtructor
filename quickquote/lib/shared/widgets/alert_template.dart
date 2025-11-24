@@ -144,7 +144,7 @@ class _AlertLoadingState extends State<AlertLoading>
                   tag: 'logo',
                   child: Image.asset(
                     AppTheme.loading,
-                    width: size.width * 1,
+                    width: size.width * 0.5,
                   )),
             ],
           ),

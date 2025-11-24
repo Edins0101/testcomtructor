@@ -3,6 +3,7 @@ import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickquote/env/theme/app_theme.dart';
+import 'package:quickquote/modules/quotes/pages/quotes_page.dart';
 import 'package:quickquote/shared/helpers/global_helper.dart';
 import 'package:quickquote/shared/providers/functional_provider.dart';
 import 'package:quickquote/shared/widgets/alert_modal.dart';
@@ -15,20 +16,13 @@ class MainLayout extends StatefulWidget {
   final String? nameInterceptor;
   final bool? backPageView;
   final bool requiredStack;
-  final bool haveLogoCenter;
   final GlobalKey<State<StatefulWidget>>? keyDismiss;
   final String? title;
   final String? subtitle;
-  final bool? isMessageWelcome;
   final bool isHomePage;
-  final bool? isVerificationModule;
-  final bool? isMenuPage;
-  final bool? haveFooterLogo;
-  final bool? isRegister;
   final bool showBottomNavBar;
   final void Function()? actionToBack;
   final Future<void> Function()? onRefresh;
-  final bool? isSosPage;
 
   const MainLayout({
     super.key,
@@ -36,21 +30,14 @@ class MainLayout extends StatefulWidget {
     this.nameInterceptor,
     this.keyDismiss,
     this.requiredStack = true,
-    this.haveLogoCenter = false,
     this.backPageView = false,
     this.title = '',
     this.subtitle,
-    this.haveFooterLogo = true,
     this.actionToBack,
     this.isHomePage = false,
-    this.isMenuPage = false,
-    this.isMessageWelcome = true,
-    this.isVerificationModule = false,
-    this.isRegister = false,
     this.onRefresh,
     this.showBottomNavBar = false,
     this.icon,
-    this.isSosPage = false,
   });
 
   @override
@@ -61,6 +48,7 @@ class _MainLayoutState extends State<MainLayout> {
   ScrollController _scrollController = ScrollController();
   bool alertModalBool = true;
   final keyModalProfile = GlobalHelper.genKey();
+  final myQuotePageKey = GlobalHelper.genKey();
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -121,26 +109,23 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final fp = Provider.of<FunctionalProvider>(context, listen: false);
+    final fp = Provider.of<FunctionalProvider>(context, listen: true);
+
     // final nvp = Provider.of<NavegationVerifyProvider>(context, listen: true);
 
     return SafeArea(
       maintainBottomViewPadding: true,
       child: Container(
-        decoration: widget.isSosPage!
-            ? const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFED4C5C), Color(0xFF1F41BB)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              )
-            : null,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFED4C5C), Color(0xFF1F41BB)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
         child: Scaffold(
           resizeToAvoidBottomInset: false,
-          backgroundColor: widget.isSosPage!
-              ? AppTheme.transparent
-              : AppTheme.white,
+          backgroundColor: AppTheme.white,
           body: Stack(
             children: [
               RefreshIndicator(
@@ -157,80 +142,48 @@ class _MainLayoutState extends State<MainLayout> {
                       ? const AlwaysScrollableScrollPhysics()
                       : const ClampingScrollPhysics(),
                   slivers: [
-                    SliverVisibility(
-                      visible: !widget.isHomePage,
-                      sliver: SliverAppBar(
-                        surfaceTintColor: AppTheme.white,
-                        leading:
-                            // !widget.isHomePage
-                            //     ?
-                            Visibility(
-                              visible: widget.backPageView!,
-                              child: InkWell(
-                                child: const Icon(
-                                  Icons.arrow_back_ios_new,
-                                  color: AppTheme.black,
-                                ),
-                                onTap: () {
-                                  widget.actionToBack != null
-                                      ? widget.actionToBack!()
-                                      : widget.keyDismiss != null
-                                      ? fp.dismissPage(key: widget.keyDismiss!)
-                                      : Navigator.pop(context);
-
-                                  setState(() {});
-                                },
-                              ),
-                            ),
-                        // : InkWell(
-                        //     child: const Icon(
-                        //       Icons.logout,
-                        //       color: AppTheme.white,
-                        //       // size: responsive.dp(2.5),
-                        //     ),
-                        //     onTap: () => _modalSessionClose(),
-                        //   ),
-                        toolbarHeight: widget.haveLogoCenter
-                            ? size.height * 0.25
-                            : widget.isHomePage || widget.isMenuPage!
-                            ? widget.subtitle != null
-                                  ? size.height * 0.1
-                                  : size.height * 0.08
-                            : size.height * 0.08,
-                        snap: false,
-                        pinned: true,
-                        forceElevated: true,
-                        automaticallyImplyLeading: false,
-                        floating: false,
-                        elevation: 0,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(0),
+                    SliverAppBar(
+                      surfaceTintColor: AppTheme.white,
+                      leading: Visibility(
+                        visible: widget.backPageView!,
+                        child: InkWell(
+                          child: const Icon(
+                            Icons.arrow_back_ios_new,
+                            color: AppTheme.white,
                           ),
+                          onTap: () {
+                            fp.dismissPage(key: widget.keyDismiss!);
+                            setState(() {});
+                          },
                         ),
-                        backgroundColor: AppTheme.primaryDarkest,
-                        centerTitle: false,
-                        title: Padding(
-                          padding: EdgeInsets.only(
-                            bottom: widget.haveLogoCenter ? 50 : 0,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: .center,
-                            mainAxisAlignment: .start,
-                            children: [
-                              // Visibility(
-                              //   visible: widget.icon != null,
-                              //   child: Icon(widget.icon, size: 35),
-                              // ),
-                              // const SizedBox(width: 10),
-                              TextWidget(
-                                title: widget.title!,
-                                color: AppTheme.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ],
-                          ),
+                      ),
+                      toolbarHeight: size.height * 0.08,
+                      snap: false,
+                      pinned: true,
+                      forceElevated: true,
+                      automaticallyImplyLeading: false,
+                      floating: false,
+                      elevation: 0,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          bottom: Radius.circular(0),
+                        ),
+                      ),
+                      backgroundColor: AppTheme.primaryDarkest,
+                      centerTitle: false,
+                      title: Padding(
+                        padding: EdgeInsets.only(bottom: 0),
+                        child: Row(
+                          crossAxisAlignment: .center,
+                          mainAxisAlignment: .start,
+                          children: [
+                            TextWidget(
+                              title: widget.title!,
+                              color: AppTheme.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -249,21 +202,26 @@ class _MainLayoutState extends State<MainLayout> {
                   right: 0,
                   bottom: 0,
                   child: BottomNavigationBar(
-                    currentIndex: 0,
+                    currentIndex:
+                        fp.currentIndex, // 👈 ahora depende del provider
                     onTap: (index) {
+                      if (fp.currentIndex == index) {
+                        return; // si ya está seleccionada, no hago nada
+                      }
+
+                      fp.setCurrentIndex(index); // 👈 esto hace notifyListeners
+
                       switch (index) {
                         case 0:
                           fp.clearAllPages();
                           break;
-                        // case 1:
-                        //   final MyRequestsPageKey = GlobalHelper.genKey();
-                        //   fp.addPage(
-                        //     key: MyRequestsPageKey,
-                        //     content: MyRequestsPage(
-                        //       globalKey: MyRequestsPageKey,
-                        //     ),
-                        //   );
-                        //   break;
+
+                        case 1:
+                          fp.addPage(
+                            key: myQuotePageKey,
+                            content: QuotesPage(globalKey: myQuotePageKey),
+                          );
+                          break;
                       }
                     },
                     backgroundColor: AppTheme.white,

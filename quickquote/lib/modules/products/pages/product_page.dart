@@ -8,7 +8,7 @@
 // }
 
 // class _ProductsPageState extends State<ProductsPage> {
-  
+
 //   List<Map<String, dynamic>> filtered = [];
 //   bool loading = false;
 //   String search = '';
@@ -24,8 +24,6 @@
 //       loading = true;
 //     });
 //     await Future.delayed(const Duration(seconds: 2));
-
-   
 
 //     filtered = products;
 //     setState(() {
@@ -121,31 +119,40 @@
 // }
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:quickquote/modules/products/widgets/products.dart';
+import 'package:quickquote/shared/providers/functional_provider.dart';
 import 'package:quickquote/shared/widgets/provider_layout.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
-
   @override
   State<ProductsPage> createState() => _ProductsPageState();
 }
 
 class _ProductsPageState extends State<ProductsPage> {
-   String search = '';
-   
-  
+  String search = '';
+  late FunctionalProvider fp;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      fp = Provider.of<FunctionalProvider>(context, listen: false);
+      // fp.clearAllPages();
+    });
+  }
+  @override
   Widget build(BuildContext context) {
-    return const MainLayout(
+    return MainLayout(
       title: 'Productos disponibles',
       nameInterceptor: 'Products',
+      isHomePage: false,
       requiredStack: true,
       showBottomNavBar: true,
       child: Column(
         children: [
-          Text('Aquí va el contenido de la página de productos'),
-          // SearchWidget(onFilter: _filterProducts ),
+          ProductsWidget()
         ],
       ),
     );
