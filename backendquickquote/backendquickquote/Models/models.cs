@@ -1,4 +1,6 @@
-﻿namespace backendquickquote.Models
+﻿using System.Text.Json;
+
+namespace backendquickquote.Models
 {
 
     record Product(
@@ -7,7 +9,13 @@
     decimal Price,
     int Stock,
     string? Category
-);
+    );
+
+    record ProductDetail(
+        int Id,
+        string Description,
+        JsonDocument Specs
+    );
 
     record Quote(
         int Id,
@@ -67,4 +75,9 @@
         List<QuotePriorityDto> Quotes
     );
 
+    public record ApiResponse<T>(
+    int Code,
+    string Message,
+    T? Data
+);
 }
